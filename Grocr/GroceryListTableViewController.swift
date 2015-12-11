@@ -6,14 +6,13 @@ import UIKit
 
 class GroceryListTableViewController: UITableViewController {
 
-  // MARK: Constants
-  let ListToUsers = "ListToUsers"
+    // MARK: Constants
+    let ListToUsers = "ListToUsers"
   
-  // MARK: Properties 
-  var items = [GroceryItem]()
-  var user: User!
-  var userCountBarButtonItem: UIBarButtonItem!
-    
+    // MARK: Properties
+    var items = [GroceryItem]()
+    var user: User!
+    var userCountBarButtonItem: UIBarButtonItem!
     let ref = Firebase(url: "https://scorching-inferno-6273.firebaseio.com/grocery-items")
   
   // MARK: UIViewController Lifecycle
@@ -36,14 +35,33 @@ class GroceryListTableViewController: UITableViewController {
   override func viewDidAppear(animated: Bool) {
     super.viewDidAppear(animated)
     
-    //To retrieve data from Firebase we set up an asynchronous listener
-    // First, you’ve added an observer that executes the given closure whenever the value that ref points to is changed. This function takes two parameters, an instance of FEventType and a closure.
-    // The event type specifies what event you want to listen for. The code above listens for a .Value event type, which in turn listens for all types of changes to the data in your Firebase database — add, removed, and changed. When a change occurs, the db updates the app. The app is notified of the change via a closure, which is passed an instance FDataSnapshot. The snapshot, as its name suggests, represents the data at that specific moment in time. To access the data in the snapshot, you use the value property.
+    // 1 - Attach a listener to receive updates whenever the grocery-items endpoint is modified
     ref.observeEventType(.Value, withBlock: { snapshot in
-        print(snapshot.value)
-        }, withCancelBlock: { error in
-            print(error.description)
+        
+        // 2 - Store the latest version of the data in a local variable inside the listener’s closure
+        var newItems = [GroceryItem]()
+        
+        // 3 - The listener’s closure returns a snapshot of the latest set of data. The snapshot contains the entire list of grocery items, not just the updates. Using children, you loop through the grocery items
+        for item in snapshot.children {
+            
+            // 4 - The GroceryItem struct has an initializer that populates its properties using a FDataSnapshot. A snapshot’s value is of type AnyObject, and can be a dictionary, array, number, or string. After creating an instance of GroceryItem, it’s added it to the array that contains the latest version of the data
+            let groceryItem = GroceryItem(snapshot: item as! FDataSnapshot)
+            newItems.append(groceryItem)
+        }
+        
+        // 5 - Reassign items to the latest version of the data, then reload the table view so it displays the latest version
+        self.items = newItems
+        self.tableView.reloadData()
     })
+    
+//    //To retrieve data from Firebase we set up an asynchronous listener
+//    // First, you’ve added an observer that executes the given closure whenever the value that ref points to is changed. This function takes two parameters, an instance of FEventType and a closure.
+//    // The event type specifies what event you want to listen for. The code above listens for a .Value event type, which in turn listens for all types of changes to the data in your Firebase database — add, removed, and changed. When a change occurs, the db updates the app. The app is notified of the change via a closure, which is passed an instance FDataSnapshot. The snapshot, as its name suggests, represents the data at that specific moment in time. To access the data in the snapshot, you use the value property.
+//    ref.observeEventType(.Value, withBlock: { snapshot in
+//        print(snapshot.value)
+//        }, withCancelBlock: { error in
+//            print(error.description)
+//    })
   }
   
   override func viewDidDisappear(animated: Bool) {
