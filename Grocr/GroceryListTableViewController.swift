@@ -31,6 +31,8 @@ class GroceryListTableViewController: UITableViewController {
   var items = [GroceryItem]()
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
+    
+    let ref = Firebase(url: "https://scorching-inferno-6273.firebaseio.com/grocery-items")
   
   // MARK: UIViewController Lifecycle
   
@@ -120,13 +122,19 @@ class GroceryListTableViewController: UITableViewController {
       message: "Add an Item",
       preferredStyle: .Alert)
     
-    let saveAction = UIAlertAction(title: "Save",
-      style: .Default) { (action: UIAlertAction!) -> Void in
-    
-      let textField = alert.textFields![0] as! UITextField
-      let groceryItem = GroceryItem(name: textField.text!, addedByUser: self.user.email, completed: false)
-      self.items.append(groceryItem)
-      self.tableView.reloadData()
+    let saveAction = UIAlertAction(title: "Save", style: .Default) { (action: UIAlertAction!) -> Void in
+            
+        // 1
+        let textField = alert.textFields![0] as! UITextField
+            
+        // 2 - creating a new GroceryItem assigned to the current user and not completed by default
+        let groceryItem = GroceryItem(name: textField.text!, addedByUser: self.user.email, completed: false)
+            
+        // 3 - create a child reference in lowercase so when the same item is entered twice, only the most recent version is saved
+        let groceryItemRef = self.ref.childByAppendingPath(textField.text!.lowercaseString)
+            
+        // 4 - here we save to Firebase and use a handy helper method in the GroceryItem class to set data as JSON
+        groceryItemRef.setValue(groceryItem.toAnyObject())
     }
     
     let cancelAction = UIAlertAction(title: "Cancel",
