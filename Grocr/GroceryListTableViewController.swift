@@ -109,14 +109,28 @@ class GroceryListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+
+    // 1
     let cell = tableView.cellForRowAtIndexPath(indexPath)!
+    // 2
     var groceryItem = items[indexPath.row]
+    // 3
     let toggledCompletion = !groceryItem.completed
-    
-    // Determine whether the cell is checked
+    // 4
     toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-    groceryItem.completed = toggledCompletion
-    tableView.reloadData()
+    // 5 - the big dog here is the updateChildValues method. This allows us to update Firebase with changes to the values, but is non-destructive as setValue_ would be 
+    groceryItem.ref?.updateChildValues([
+        "completed": toggledCompletion
+        ])
+    
+//    let cell = tableView.cellForRowAtIndexPath(indexPath)!
+//    var groceryItem = items[indexPath.row]
+//    let toggledCompletion = !groceryItem.completed
+//    
+//    // Determine whether the cell is checked
+//    toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+//    groceryItem.completed = toggledCompletion
+//    tableView.reloadData()
   }
   
   func toggleCellCheckbox(cell: UITableViewCell, isCompleted: Bool) {
