@@ -93,11 +93,19 @@ class GroceryListTableViewController: UITableViewController {
   }
   
   override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+
     if editingStyle == .Delete {
-      // Find the snapshot and remove the value
-      items.removeAtIndex(indexPath.row)
-      tableView.reloadData()
+        // 1
+        let groceryItem = items[indexPath.row]
+        // 2
+        groceryItem.ref?.removeValue()
     }
+    
+//    if editingStyle == .Delete {
+//      // Find the snapshot and remove the value
+//      items.removeAtIndex(indexPath.row)
+//      tableView.reloadData()
+//    }
   }
   
   override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
