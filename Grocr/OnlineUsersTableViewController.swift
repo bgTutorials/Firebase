@@ -29,12 +29,38 @@ class OnlineUsersTableViewController: UITableViewController {
   
   // MARK: Properties
   var currentUsers: [String] = [String]()
+    let usersRef = Firebase(url: "https://scorching-inferno-6273.firebaseio.com/online")
   
-  // MARK: UIViewController Lifecycle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    currentUsers.append("hungry@person.food")
-  }
+    // MARK: UIViewController Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        // 1 - we are just adding an observer to monitor the status of the Firebase location referenced
+        usersRef.observeEventType(.ChildAdded) { [weak self] (snapshot: FDataSnapshot!) in
+            guard let strongSelf = self else { return }
+            // 2 - here we take the info from the snapshot and append it to the currentUsers array
+            strongSelf.currentUsers.append(snapshot.value as! String)
+            let row = strongSelf.currentUsers.count - 1
+            let indexPath = NSIndexPath(forRow: row, inSection: 0)
+            strongSelf.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
+        }
+        
+        usersRef.observeEventType(.ChildRemoved) { [weak self] (snapshot: FDataSnapshot!) in
+            guard let strongSelf = self, emailToFind = snapshot.value as? String else { return }
+            
+            for (i, e) in strongSelf.currentUsers.enumerate() {
+                if e == emailToFind {
+                    let indexPath = NSIndexPath(forRow: i, inSection: 0)
+                    strongSelf.currentUsers.removeAtIndex(i)
+                    strongSelf.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                }
+            }
+        }
+    }
+    
 
   // MARK: UITableView Delegate methods
   
