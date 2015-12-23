@@ -72,6 +72,12 @@ class GroceryListTableViewController: UITableViewController {
 //        }, withCancelBlock: { error in
 //            print(error.description)
 //    })
+    
+    ref.observeAuthEventWithBlock { authData in
+        if authData != nil {
+            self.user = User(authData: authData)
+        }
+    }
   }
   
   override func viewDidDisappear(animated: Bool) {
