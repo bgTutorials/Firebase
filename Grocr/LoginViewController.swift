@@ -26,7 +26,11 @@ class LoginViewController: UIViewController {
   
   // MARK: Actions
   @IBAction func loginDidTouch(sender: AnyObject) {
-    performSegueWithIdentifier(LoginToList, sender: nil)
+    // this code authenticates the user when pressing the Login In Button
+    ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text,
+        withCompletionBlock: { (error, auth) in
+            
+    })
   }
 
   @IBAction func signUpDidTouch(sender: AnyObject) {
