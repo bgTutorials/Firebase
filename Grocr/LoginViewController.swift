@@ -23,6 +23,19 @@ class LoginViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
   }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // 1 - create an authorization observer with observeAuthEventWithBlock
+        ref.observeAuthEventWithBlock { (authData) -> Void in
+            // 2 - the closure is fed the user's data as the authData parameter. Successfuly authorizatoin is passed the users info, but unsuccessful auth will return nil
+            if authData != nil {
+                // 3 - upon successful auth, perform a segue
+                self.performSegueWithIdentifier(self.LoginToList, sender: nil)
+            }
+        }
+    }
   
   // MARK: Actions
   @IBAction func loginDidTouch(sender: AnyObject) {
