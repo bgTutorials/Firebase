@@ -14,6 +14,7 @@ class GroceryListTableViewController: UITableViewController {
     var user: User!
     var userCountBarButtonItem: UIBarButtonItem!
     let ref = Firebase(url: "https://scorching-inferno-6273.firebaseio.com/grocery-items")
+    let usersRef = Firebase(url: "https://scorching-inferno-6273.firebaseio.com/online")
   
   // MARK: UIViewController Lifecycle
   
@@ -73,11 +74,26 @@ class GroceryListTableViewController: UITableViewController {
 //            print(error.description)
 //    })
     
+    // we are observing here the user is authorized from the login view. when a user is auth or authData is not nil, we use the users info from the authData parameter
     ref.observeAuthEventWithBlock { authData in
         if authData != nil {
             self.user = User(authData: authData)
+            // 1 - create a user's id using uid (which is created on Firebase when an account is created)
+            let currentUserRef = self.usersRef.childByAppendingPath(self.user.uid)
+            // 2 - we use that reference to save the current state of the user
+            currentUserRef.setValue(self.user.email)
+            // 3 - this method removes the online state of the user. so when the user exits the app, they are no longer listed as currently online.
+            currentUserRef.onDisconnectRemoveValue()
         }
     }
+    // another observer here - this time we are observing the users presence on the app.  As users go online, the userCountBarButton is updated to reflect the accurate number of users online.
+    usersRef.observeEventType(.Value, withBlock: { (snapshot: FDataSnapshot!) in
+        if snapshot.exists() {
+            self.userCountBarButtonItem?.title = snapshot.childrenCount.description
+        } else {
+            self.userCountBarButtonItem?.title = "0"
+        }
+    })
   }
   
   override func viewDidDisappear(animated: Bool) {
